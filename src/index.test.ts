@@ -67,6 +67,23 @@ test('intoString works', () => {
     expect(ev.eval(['intoString', 3.4])).toBe('3.4')
 })
 
+test('let works', () => {
+    expect(ev.eval([
+        'let', 
+        'name', 'lisp.json',
+        'language', 'typescript',
+        'math', ['+', '2', '2'],
+        ['concat', 
+            'The name of the project is ', 
+            ['get', 'name'], 
+            ' and its written in ', 
+            ['get', 'language'], 
+            '. Random math: ', 
+            ['get', 'math']
+        ]
+    ])).toBe('The name of the project is lisp.json and its written in typescript. Random math: 22')
+})
+
 test('should not side effect pushThis', () => {
     const that = ev.pushThis()
     that.env['test'] = 2

@@ -165,5 +165,20 @@ const baseLispEnvironment : LispEnvironment = {
             let txt = (that.intoString as LispFunction)(cur)
             return acc + (txt as string)
         })
+    },
+    "let": function (...rv) {
+        if (rv.length % 2 == 0) {
+            throw new Error("[let, key, value, key, value, ..., ret]")
+        }
+        let newEnv = pushThis(this)
+        for (let i = 0; i < (rv.length - 1) / 2; i++) {
+            const key = (this.eval as LispFunction).bind(newEnv)(rv[i*2])
+            if (typeof key != 'string') {
+                throw new Error(`variable key is a ${typeof key} but must be string`)
+            }
+            const value = (this.eval as LispFunction).bind(newEnv)(rv[i*2 + 1])
+            newEnv[key] = value
+        }
+        return (this.eval as LispFunction).bind(newEnv)(rv[rv.length - 1])
     }
 } 
