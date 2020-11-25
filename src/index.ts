@@ -39,12 +39,16 @@ export default class LispEvaluator {
 function variadicNumOp(pair: (x: number, y: number) => number): LispFunction {
     return function (...rv) {
         const v = (this.evalAll as LispFunction)(...rv) as LispValue[]
-        return [...v].reduce((acc, cur) => {
+        const first = Number(v[0])
+        if (first === NaN) {
+            throw `error at function +: ${v[0]} is not a number`
+        }
+        return [first, ...v.slice(1)].reduce((acc, cur) => {
             switch (typeof cur) {
                 case 'number':
                     return pair(acc as number, cur)
                 case 'string':
-                    const strnum = parseFloat(cur as string)
+                    const strnum = Number(cur as string)
                     if (isNaN(strnum)) {
                         throw `error at function +: ${cur} is not a number`
                     }

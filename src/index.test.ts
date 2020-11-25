@@ -43,6 +43,7 @@ test('if works', () => {
 
 test('+ works', () => {
     expect(ev.eval(['+', 1, 2, 3, 4])).toBe(10)
+    expect(ev.eval(['+', '2', '2'])).toBe(4)
 })
 
 test('- works', () => {
@@ -72,7 +73,7 @@ test('let works', () => {
         'let', 
         'name', 'lisp.json',
         'language', 'typescript',
-        'math', ['+', '2', '2'],
+        'math', ['+', 2, '2'],
         ['concat', 
             'The name of the project is ', 
             ['get', 'name'], 
@@ -81,7 +82,7 @@ test('let works', () => {
             '. Random math: ', 
             ['get', 'math']
         ]
-    ])).toBe('The name of the project is lisp.json and its written in typescript. Random math: 22')
+    ])).toBe('The name of the project is lisp.json and its written in typescript. Random math: 4')
 })
 
 test('should not side effect pushThis', () => {
