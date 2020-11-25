@@ -41,6 +41,22 @@ test('if works', () => {
     expect(ev.eval(['if', false, 1, 2])).toBe(2)
 })
 
+test('+ works', () => {
+    expect(ev.eval(['+', 1, 2, 3, 4])).toBe(10)
+})
+
+test('- works', () => {
+    expect(ev.eval(['-', 20, 6, 4, 1])).toBe(9)
+})
+
+test('* works', () => {
+    expect(ev.eval(['*', 2, 10, 4])).toBe(80)
+})
+
+test('/ works', () => {
+    expect(ev.eval(['/', 50, 5, 3])).toBe(10/3)
+})
+
 test('should not side effect pushThis', () => {
     const that = ev.pushThis()
     that.env['test'] = 2

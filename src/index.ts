@@ -1,7 +1,7 @@
 import { assert } from "console"
 
 export type LispValue = LispFunction | number | string | LispValue[] | boolean | null
-export type LispFunction = (...v: LispValue[]) => LispValue
+export type LispFunction = (this: LispEnvironment, ...v: LispValue[]) => LispValue
 export type LispExpression = [LispFunction | string, ...LispValue[]]
 
 export type LispRequest = {
@@ -22,24 +22,41 @@ export default class LispEvaluator {
         this.env = extraEnv
     }
 
-    public responder(req: LispRequest): LispValue[] {
-        assert(this.env)
+    public responder(this: LispEvaluator, req: LispRequest): LispValue[] {
         return (this.env.evalAll as LispFunction).bind(this.env)(req.actions) as LispValue[]
     }
-    public eval(v: LispValue): LispValue {
-        assert(this.env)
+    public eval(this: LispEvaluator, v: LispValue): LispValue {
         return (this.env.eval as LispFunction).bind(this.env)(v)
     }
-    public evalAll(...v: LispValue[]): LispValue[] {
-        assert(this.env != undefined)
+    public evalAll(this: LispEvaluator, ...v: LispValue[]): LispValue[] {
         assert(this.env.evalAll != undefined)
         return (this.env.evalAll as LispFunction).bind(this.env)(...v) as LispValue[]
     }
-    public pushThis(): LispEvaluator {
+    public pushThis(this: LispEvaluator): LispEvaluator {
         assert(this.env)
         let ret = Object.create(this)
         ret.env = Object.create(this.env)
         return ret
+    }
+}
+
+function variadicNumOp(pair: (x: number, y: number) => number): LispFunction {
+    return function (...rv) {
+        const v = (this.evalAll as LispFunction)(...rv) as LispValue[]
+        return [...v].reduce((acc, cur) => {
+            switch (typeof cur) {
+                case 'number':
+                    return pair(acc as number, cur)
+                case 'string':
+                    const strnum = parseFloat(cur as string)
+                    if (isNaN(strnum)) {
+                        throw `error at function +: ${cur} is not a number`
+                    }
+                    return pair(acc as number, strnum)
+                default:
+                    throw new Error(`unsupported type ${typeof cur}`)
+            }
+        })
     }
 }
 
@@ -85,7 +102,7 @@ const baseLispEnvironment : LispEnvironment = {
             throw new Error("can't call something that is not a function")
         }
         const pushedThis = (this.pushThis as LispFunction)()
-        return fnCandidate.bind(pushedThis)(...expr)
+        return fnCandidate.bind(pushedThis as unknown as LispEnvironment)(...expr)
     },
     car(rv) {
         const v = (this.eval as LispFunction)(rv)
@@ -136,21 +153,8 @@ const baseLispEnvironment : LispEnvironment = {
     intoBool(v) {
         return Boolean(v)
     },
-    '+': function (...rv) {
-        const v = (this.evalAll as LispFunction)(rv) as LispValue[]
-        return v.reduce((acc, cur) => {
-            switch (typeof cur) {
-                case 'number':
-                    return (acc as number) + cur
-                case 'string':
-                    const strnum = parseFloat(cur as string)
-                    if (isNaN(strnum)) {
-                        throw `error at function +: ${cur} is not a number`
-                    }
-                    return (acc as number) + strnum
-                default:
-                    throw new Error(`unsupported type ${typeof cur}`)
-            }
-        })
-    }
+    "+": variadicNumOp((x, y) => x + y),
+    "-": variadicNumOp((x, y) => x - y),
+    "*": variadicNumOp((x, y) => x * y),
+    "/": variadicNumOp((x, y) => x / y),
 } 
