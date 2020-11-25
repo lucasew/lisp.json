@@ -99,8 +99,8 @@ const baseLispEnvironment : LispEnvironment = {
         if (typeof fnCandidate !== 'function') {
             throw new Error("can't call something that is not a function")
         }
-        const pushedThis = pushThis(this)
-        return fnCandidate.bind(pushedThis as unknown as LispEnvironment)(...expr)
+        // const pushedThis = pushThis(this)
+        return fnCandidate.bind(this)(...expr)/*.bind(pushedThis as unknown as LispEnvironment)*/ 
     },
     car(rv) {
         const v = (this.eval as LispFunction)(rv)

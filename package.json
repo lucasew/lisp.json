@@ -2,7 +2,11 @@
   "name": "lispjs-spec",
   "version": "0.0.1",
   "description": "lisp evaluator in js",
+  "homepage": "https://github.com/lucasew/lisp.json",
   "main": "src/index.js",
+  "bin": {
+    "lisp.json": "src/repl.ts"
+  },
   "author": "lucasew",
   "license": "MIT",
   "private": false,
@@ -20,6 +24,7 @@
     "jest": "^26.6.3"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "repl": "ts-node src/repl.ts"
   }
 }
