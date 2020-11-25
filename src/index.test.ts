@@ -57,6 +57,16 @@ test('/ works', () => {
     expect(ev.eval(['/', 50, 5, 3])).toBe(10/3)
 })
 
+test('concat works', () => {
+    expect(ev.eval(['concat', 'teste: ', 24])).toBe("teste: 24")
+})
+
+test('intoString works', () => {
+    expect(ev.eval(['intoString', 1])).toBe('1')
+    expect(ev.eval(['intoString', null])).toBe('null')
+    expect(ev.eval(['intoString', 3.4])).toBe('3.4')
+})
+
 test('should not side effect pushThis', () => {
     const that = ev.pushThis()
     that.env['test'] = 2

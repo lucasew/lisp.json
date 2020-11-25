@@ -151,8 +151,19 @@ const baseLispEnvironment : LispEnvironment = {
     intoBool(v) {
         return Boolean(v)
     },
+    intoString(v) {
+        return String(v)
+    },
     "+": variadicNumOp((x, y) => x + y),
     "-": variadicNumOp((x, y) => x - y),
     "*": variadicNumOp((x, y) => x * y),
     "/": variadicNumOp((x, y) => x / y),
+    concat(...rv) {
+        const v = (this.evalAll as LispFunction)(...rv) as LispValue[]
+        const that = this
+        return ['', ...v].reduce((acc, cur) => {
+            let txt = (that.intoString as LispFunction)(cur)
+            return acc + (txt as string)
+        })
+    }
 } 
