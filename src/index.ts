@@ -16,10 +16,7 @@ export default class LispEvaluator {
     constructor(options?: {
         extraEnv?: LispEnvironment
     }) {
-        const that = this
-        let extraEnv = options?.extraEnv || {}
-        extraEnv.__proto__ = this.env as any
-        this.env = extraEnv
+        this.env = pushThis(this.env, options?.extraEnv)
     }
 
     public responder(this: LispEvaluator, req: LispRequest): LispValue[] {
@@ -33,9 +30,8 @@ export default class LispEvaluator {
         return (this.env.evalAll as LispFunction).bind(this.env)(...v) as LispValue[]
     }
     public pushThis(this: LispEvaluator): LispEvaluator {
-        assert(this.env)
-        let ret = Object.create(this)
-        ret.env = Object.create(this.env)
+        let ret = pushThis(this)
+        ret.env = pushThis(this.env)
         return ret
     }
 }
@@ -59,11 +55,13 @@ function variadicNumOp(pair: (x: number, y: number) => number): LispFunction {
         })
     }
 }
+export function pushThis<T extends Object>(base: T, layer?: T | undefined) {
+    let ret = (layer || {}) as any
+    ret.__proto__ = base
+    return ret as T
+}
 
 const baseLispEnvironment : LispEnvironment = {
-    pushThis() {
-        return Object.create(this)
-    },
     eval(v) {
         if (Array.isArray(v)) {
             if (v.length == 0) {
@@ -101,7 +99,7 @@ const baseLispEnvironment : LispEnvironment = {
         if (typeof fnCandidate !== 'function') {
             throw new Error("can't call something that is not a function")
         }
-        const pushedThis = (this.pushThis as LispFunction)()
+        const pushedThis = pushThis(this)
         return fnCandidate.bind(pushedThis as unknown as LispEnvironment)(...expr)
     },
     car(rv) {
