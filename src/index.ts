@@ -52,9 +52,6 @@ const baseLispEnvironment : LispEnvironment = {
             if (v.length == 0) {
                 throw new Error("tried to evaluate empty list")
             }
-            if (typeof v[0] != 'string' && typeof v[0] != 'function') {
-                throw new Error(`${v[0]} is not a function nor a string/symbol`)
-            }
             return (this.evalFunction as LispFunction)(...v)
         }
         let ret: Record<string, LispValue> = {
@@ -77,6 +74,10 @@ const baseLispEnvironment : LispEnvironment = {
     evalFunction(fn, ...expr) {
         let fnCandidate = fn
         assert(this.isFunction)
+        if (Array.isArray(fnCandidate)) {
+            const evaluated = (this.eval as LispFunction)(fnCandidate)
+            return (this.evalFunction as LispFunction)(evaluated, expr)
+        }
         if (typeof fnCandidate == 'string') {
             fnCandidate = this[fnCandidate] as LispFunction
         }
@@ -103,6 +104,9 @@ const baseLispEnvironment : LispEnvironment = {
             }
         }
         return null
+    },
+    sym(sym) {
+        return () => (this.get as LispFunction)(sym)
     },
     cdr(rv) {
         const v = (this.eval as LispFunction)(rv)

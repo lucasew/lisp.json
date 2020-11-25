@@ -20,6 +20,12 @@ test('get works', () => {
     expect(that.eval(['get', 'test'])).toBe(2)
 })
 
+test('sym works', () => {
+    const that = ev.pushThis()
+    that.env['test'] = 2
+    expect(that.eval([['sym', 'test']])).toBe(2)
+})
+
 test('evalAll works', () => {
     expect(ev.evalAll(1, "eoq", ['quote', 2])).toStrictEqual([1, 'eoq', 2])
 })
