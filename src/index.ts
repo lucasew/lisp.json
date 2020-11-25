@@ -1,3 +1,5 @@
+import { assert } from "console"
+
 export type LispValue = LispFunction | number | string | LispValue[] | boolean | null
 export type LispFunction = (...v: LispValue[]) => LispValue
 export type LispExpression = [LispFunction | string, ...LispValue[]]
@@ -10,74 +12,82 @@ export type LispEnvironment = Record<string, LispValue>
 
 export default class LispEvaluator {
     public env: LispEnvironment = baseLispEnvironment
+
     constructor(options?: {
         extraEnv?: LispEnvironment
     }) {
-        if (options?.extraEnv) {
-            const extraEnv = options.extraEnv as any
-            extraEnv.__proto__ = this.env
-            this.env = options.extraEnv
-        }
+        const that = this
+        let extraEnv = options?.extraEnv || {}
+        extraEnv.__proto__ = this.env as any
+        this.env = extraEnv
+    }
+
+    public responder(req: LispRequest): LispValue[] {
+        assert(this.env)
+        return (this.env.evalAll as LispFunction).bind(this.env)(req.actions) as LispValue[]
+    }
+    public eval(v: LispValue): LispValue {
+        assert(this.env)
+        return (this.env.eval as LispFunction).bind(this.env)(v)
+    }
+    public evalAll(...v: LispValue[]): LispValue[] {
+        assert(this.env != undefined)
+        assert(this.env.evalAll != undefined)
+        return (this.env.evalAll as LispFunction).bind(this.env)(...v) as LispValue[]
     }
     public pushThis(): LispEvaluator {
+        assert(this.env)
         let ret = Object.create(this)
         ret.env = Object.create(this.env)
         return ret
     }
-    public eval(v: LispValue): LispValue {
+}
+
+const baseLispEnvironment : LispEnvironment = {
+    pushThis() {
+        return Object.create(this)
+    },
+    eval(v) {
         if (Array.isArray(v)) {
             if (v.length == 0) {
                 throw new Error("tried to evaluate empty list")
             }
-            return this.evalFunction(v)
-        }
-        switch (typeof v) {
-            case 'string':
-                return v
-            case 'number':
-                return v
-            case 'boolean':
-                return v
-            case 'function':
-                return v
-            case 'undefined':
-                return null
-            default:
-                throw new Error(`invalid value of type ${typeof v}: ${v}`)
-        }
-    }
-    public evalFunction(expr: LispValue[]): LispValue {
-        let fnCandidate = expr[0]
-        if (typeof fnCandidate == 'string') {
-            if (fnCandidate === 'quote') {
-                if (expr.length == 1) {
-                    return null
-                } else {
-                    return expr[1]
-                }
+            if (typeof v[0] != 'string' && typeof v[0] != 'function') {
+                throw new Error(`${v[0]} is not a function nor a string/symbol`)
             }
-            fnCandidate = this.env[fnCandidate] as LispFunction
+            return (this.evalFunction as LispFunction)(...v)
         }
-        if (!(this.env.isFunction as LispFunction)(fnCandidate)) {
-            console.log(fnCandidate)
+        let ret: Record<string, LispValue> = {
+            'string': v,
+            'number': v,
+            'boolean': v,
+            'function': v,
+            'undefined': null,
+        }
+        const chosen = ret[typeof v]
+        if (chosen !== undefined) {
+            return chosen
+        } else {
+            throw new Error(`invalid value of type ${typeof v}: ${v}`)
+        }
+    },
+    evalAll(...v) {
+        return v.map((cur) => (this.eval as LispFunction)(cur))
+    },
+    evalFunction(fn, ...expr) {
+        let fnCandidate = fn
+        assert(this.isFunction)
+        if (typeof fnCandidate == 'string') {
+            fnCandidate = this[fnCandidate] as LispFunction
+        }
+        if (typeof fnCandidate !== 'function') {
             throw new Error("can't call something that is not a function")
         }
-        const that = this
-        const evaluatedElements = expr.slice(1).map((curExpr) =>
-            that.eval.bind(this.pushThis())(curExpr)
-        )
-        return (fnCandidate as LispFunction).bind(this.pushThis())(...evaluatedElements)
-    }
-    public responder(req: LispRequest): LispValue[] {
-        const that = this
-        return req.actions.map((req) => that.eval.bind(that.pushThis())(req))
-    }
-}
-
-
-
-const baseLispEnvironment : LispEnvironment = {
-    car(v) {
+        const pushedThis = (this.pushThis as LispFunction)()
+        return fnCandidate.bind(pushedThis)(...expr)
+    },
+    car(rv) {
+        const v = (this.eval as LispFunction)(rv)
         if (Array.isArray(v)) {
             if (v.length > 0) {
                 return v[0]
@@ -85,7 +95,17 @@ const baseLispEnvironment : LispEnvironment = {
         }
         return null
     },
-    cdr(v) {
+    get(sym) {
+        if ((this.isString as LispFunction)(sym)) {
+            const ret = this[sym as string]
+            if (ret != undefined) {
+                return ret
+            }
+        }
+        return null
+    },
+    cdr(rv) {
+        const v = (this.eval as LispFunction)(rv)
         if (Array.isArray(v)) {
             if (v.length > 0) {
                 return v.slice(1)
@@ -93,10 +113,17 @@ const baseLispEnvironment : LispEnvironment = {
         }
         return []
     },
-    isFunction(v) {
-        return typeof v == 'function'
+    quote(rv) {
+        return rv
     },
-    '+': function (...v) {
+    isFunction(rv) {
+        return typeof (this.eval as LispFunction)(rv) === 'function'
+    },
+    isString(rv) {
+        return typeof (this.eval as LispFunction)(rv) === 'string'
+    },
+    '+': function (...rv) {
+        const v = (this.evalAll as LispFunction)(rv) as LispValue[]
         return v.reduce((acc, cur) => {
             switch (typeof cur) {
                 case 'number':
