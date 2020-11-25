@@ -126,6 +126,16 @@ const baseLispEnvironment : LispEnvironment = {
     isString(rv) {
         return typeof (this.eval as LispFunction)(rv) === 'string'
     },
+    "if": function (cond, a, b) {
+        return (this.eval as LispFunction)(
+            (this.intoBool as LispFunction)(cond)
+            ? a
+            : b
+        )
+    },
+    intoBool(v) {
+        return Boolean(v)
+    },
     '+': function (...rv) {
         const v = (this.evalAll as LispFunction)(rv) as LispValue[]
         return v.reduce((acc, cur) => {

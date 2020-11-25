@@ -36,6 +36,11 @@ test('isFunction works', () => {
     expect(second).toBeTruthy()
 })
 
+test('if works', () => {
+    expect(ev.eval(['if', true, 1, 2])).toBe(1)
+    expect(ev.eval(['if', false, 1, 2])).toBe(2)
+})
+
 test('should not side effect pushThis', () => {
     const that = ev.pushThis()
     that.env['test'] = 2
