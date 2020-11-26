@@ -92,7 +92,8 @@ const baseLispEnvironment : LispEnvironment = {
         }
     },
     evalAll(...v) {
-        return v.map((cur) => (this.eval as LispFunction)(cur))
+        const that = this
+        return v.map((cur) => (that.eval as LispFunction).bind(that)(cur))
     },
     evalFunction(fn, ...expr) {
         let fnCandidate = fn
@@ -105,7 +106,7 @@ const baseLispEnvironment : LispEnvironment = {
             fnCandidate = this[fnCandidate] as LispFunction
         }
         if (typeof fnCandidate !== 'function') {
-            throw new Error("can't call something that is not a function")
+            throw new Error(`can't call something that is not a function near ${JSON.stringify([fn, ...expr])}`)
         }
         // const pushedThis = pushThis(this)
         return fnCandidate.bind(this)(...expr)/*.bind(pushedThis as unknown as LispEnvironment)*/ 
@@ -198,7 +199,15 @@ const baseLispEnvironment : LispEnvironment = {
             if (!Array.isArray(y)) {
                 return false
             }
-            return x === y
+            if (x.length != y.length) {
+                return false
+            }
+            for (const i in x) {
+                if ((this.eq as LispFunction)(x[i], y[i]) != true) {
+                    return false
+                }
+            }
+            return true
         }
         if (x == null) {
             return y == null
@@ -224,6 +233,15 @@ const baseLispEnvironment : LispEnvironment = {
         }
         throw new Error(`assertion failed: ${String(a)}`)
     },
+    "assertEq": function (a, b) {
+        const isEq = (this.eq as LispFunction)(a, b)
+        if (!isEq) {
+            const [ea, eb] = (this.evalAll as LispFunction)(a, b) as [LispValue, LispValue]
+            throw new Error(`${JSON.stringify(ea)} is different to ${JSON.stringify(eb)}`)
+        }
+        return null
+    }
+    ,
     "throw": function (a) {
         const [msg] = (this.evalAll as LispFunction)(a) as [LispValue, LispValue]
         const msgStr = (this.intoString as LispFunction)(msg)

@@ -1,6 +1,23 @@
+import { readFileSync } from 'fs'
+import { join } from 'path'
 import LispEvaluator, { LispFunction, LispValue } from './index'
 
 const ev = new LispEvaluator()
+
+test('integration test', () => {
+    const buf = readFileSync(join(__dirname, '..', 'tests.json'))
+    const ast = JSON.parse(buf.toString('utf-8'))
+    const testCases = ast.request as any[]
+    for (const i in testCases) {
+        const test = testCases[i]
+        try {
+            const res = ev.eval(test)
+            expect(res).toBe(null)
+        } catch (e) {
+            throw `FAIL ${i}: ${JSON.stringify(test)} ${e}`
+        }
+    }
+})
 
 test('number eval works', () => {
     expect(ev.eval(2)).toBe(2)
