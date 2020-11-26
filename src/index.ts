@@ -236,5 +236,10 @@ const baseLispEnvironment : LispEnvironment = {
         } catch (e) {
             return ['error', e.message ? e.message : String(e)]
         }
+    },
+    not(expr) {
+        const evaluated = (this.eval as LispFunction)(expr)
+        const booleaned = (this.intoBool as LispFunction)(evaluated)
+        return !booleaned
     }
 } 
