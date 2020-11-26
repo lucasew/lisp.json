@@ -222,5 +222,10 @@ const baseLispEnvironment : LispEnvironment = {
             throw new Error(String(msg))
         }
         throw new Error(`assertion failed: ${String(a)}`)
+    },
+    "throw": function (a) {
+        const [msg] = (this.evalAll as LispFunction)(a) as [LispValue, LispValue]
+        const msgStr = (this.intoString as LispFunction)(msg)
+        throw new Error(String(msgStr))
     }
 } 

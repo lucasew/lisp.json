@@ -81,6 +81,14 @@ test('assert works', () => {
     expect(ev.eval(['assert', ['eq', 2, 2], 'this must happen'])).toBeNull()
 })
 
+test('throw works', () => {
+    expect(() => ev.eval(['throw', 'this must happen'])).toThrow('this must happen')
+    expect(() => ev.eval([
+        'let', 'sometext', 'yes',
+        ['throw', ['get', 'sometext']]
+    ])).toThrow('yes')
+})
+
 test('let works', () => {
     expect(ev.eval([
         'let', 
