@@ -35,7 +35,7 @@ async function runRepl() {
             const evaluated = vm.eval(obj)
             console.log(evaluated)
         } catch (e) {
-            console.log(`error: ${e}`)
+            console.log(`error: ${e.message || e}`)
             continue
         } finally {
             buf = ''
