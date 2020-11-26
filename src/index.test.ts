@@ -90,7 +90,7 @@ test('throw works', () => {
 })
 
 test('try works', () => {
-    expect(ev.eval(['try', ['throw', 'test']])).toStrictEqual(['error', 'Error: test'])
+    expect(ev.eval(['try', ['throw', 'test']])).toStrictEqual(['error', 'test'])
 })
 
 test('let works', () => {

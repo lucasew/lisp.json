@@ -1,4 +1,5 @@
 import { assert } from "console"
+import { stringify } from "querystring"
 
 export type LispValue = LispFunction | number | string | LispValue[] | boolean | null
 export type LispFunction = (this: LispEnvironment, ...v: LispValue[]) => LispValue
@@ -233,7 +234,7 @@ const baseLispEnvironment : LispEnvironment = {
             const ret = (this.eval as LispFunction)(expr)
             return ret
         } catch (e) {
-            return ['error', String(e)]
+            return ['error', e.message ? e.message : String(e)]
         }
     }
 } 
