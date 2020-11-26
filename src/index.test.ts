@@ -68,6 +68,14 @@ test('intoString works', () => {
     expect(ev.eval(['intoString', 3.4])).toBe('3.4')
 })
 
+test('eq works', () => {
+    expect(ev.eval(['eq', 2, 2])).toBe(true)
+    expect(ev.eval(['eq', 2, '2'])).toBe(false)
+    expect(ev.eval(['eq', '2', '2'])).toBe(true)
+    expect(ev.eval(['eq', ['quote', 2], 2])).toBe(true)
+    expect(ev.eval(['eq', false, null])).toBe(false)
+})
+
 test('let works', () => {
     expect(ev.eval([
         'let', 

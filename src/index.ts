@@ -73,6 +73,9 @@ const baseLispEnvironment : LispEnvironment = {
             }
             return (this.evalFunction as LispFunction)(...v)
         }
+        if (v == null) {
+            return null
+        }
         let ret: Record<string, LispValue> = {
             'string': v,
             'number': v,
@@ -184,5 +187,30 @@ const baseLispEnvironment : LispEnvironment = {
             newEnv[key] = value
         }
         return (this.eval as LispFunction).bind(newEnv)(rv[rv.length - 1])
+    },
+    eq(a, b) {
+        const [x, y] = (this.evalAll as LispFunction)(a, b) as [LispValue, LispValue]
+        if (typeof x != typeof y) {
+            return false
+        }
+        if (Array.isArray(x)) {
+            if (!Array.isArray(y)) {
+                return false
+            }
+            return x === y
+        }
+        if (x == null) {
+            return y == null
+        }
+        switch (typeof x) {
+            case 'number':
+                return x == y
+            case 'string':
+                return x === y
+            case 'boolean':
+                return x == y
+            default:
+                throw new Error(`base type comparation ${typeof x} is not implemented`)
+        }
     }
 } 
