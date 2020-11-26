@@ -89,6 +89,10 @@ test('throw works', () => {
     ])).toThrow('yes')
 })
 
+test('try works', () => {
+    expect(ev.eval(['try', ['throw', 'test']])).toStrictEqual(['error', 'Error: test'])
+})
+
 test('let works', () => {
     expect(ev.eval([
         'let', 

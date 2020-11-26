@@ -227,5 +227,13 @@ const baseLispEnvironment : LispEnvironment = {
         const [msg] = (this.evalAll as LispFunction)(a) as [LispValue, LispValue]
         const msgStr = (this.intoString as LispFunction)(msg)
         throw new Error(String(msgStr))
+    },
+    "try": function (expr) {
+        try {
+            const ret = (this.eval as LispFunction)(expr)
+            return ret
+        } catch (e) {
+            return ['error', String(e)]
+        }
     }
 } 
