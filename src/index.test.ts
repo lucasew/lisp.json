@@ -76,6 +76,11 @@ test('eq works', () => {
     expect(ev.eval(['eq', false, null])).toBe(false)
 })
 
+test('assert works', () => {
+    expect(() => ev.eval(['assert', false, 'this must happen'])).toThrow()
+    expect(ev.eval(['assert', ['eq', 2, 2], 'this must happen'])).toBeNull()
+})
+
 test('let works', () => {
     expect(ev.eval([
         'let', 

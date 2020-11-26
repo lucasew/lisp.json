@@ -212,5 +212,15 @@ const baseLispEnvironment : LispEnvironment = {
             default:
                 throw new Error(`base type comparation ${typeof x} is not implemented`)
         }
+    },
+    "assert": function (a, b) {
+        const [check, msg] = (this.evalAll as LispFunction)(a, b) as [LispValue, LispValue]
+        if ((this.intoBool as LispFunction)(check)) {
+            return null
+        }
+        if (msg) {
+            throw new Error(String(msg))
+        }
+        throw new Error(`assertion failed: ${String(a)}`)
     }
 } 
