@@ -10,18 +10,20 @@
   "author": "lucasew",
   "license": "MIT",
   "private": false,
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
-    "ts-jest": "^26.4.4",
-    "ts-node": "^9.0.0",
     "@babel/core": "^7.12.8",
     "@babel/preset-env": "^7.12.7",
     "@babel/preset-typescript": "^7.12.7",
     "@types/jest": "^26.0.15",
     "@types/node": "^14.14.9",
     "babel-jest": "^26.6.3",
-    "jest": "^26.6.3"
+    "jest": "^26.6.3",
+    "ts-jest": "^26.4.4",
+    "ts-loader": "^8.0.11",
+    "ts-node": "^9.0.0",
+    "webpack": "^5.9.0",
+    "webpack-cli": "^4.2.0"
   },
   "scripts": {
     "test": "jest --coverage src/index.test.ts",

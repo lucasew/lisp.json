@@ -96,7 +96,6 @@ const baseLispEnvironment : LispEnvironment = {
     },
     evalFunction(fn, ...expr) {
         let fnCandidate = fn
-        assert(this.isFunction)
         if (Array.isArray(fnCandidate)) {
             const evaluated = (this.eval as LispFunction)(fnCandidate)
             return (this.evalFunction as LispFunction)(evaluated, expr)
