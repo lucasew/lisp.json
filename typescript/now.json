@@ -1,0 +1,6 @@
+{
+    "routes": [
+        {"src": "/dist/LispJSON.js", "dest": "/dist/LispJSON.js"},
+        {"src": "/(.*)", "dest": "/index.html"}
+    ]
+}
