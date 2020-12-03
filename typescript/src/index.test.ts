@@ -17,7 +17,7 @@ function setupIntegrationTest(filename: string) {
     }
 }
 
-setupIntegrationTest(join(__dirname, "..", "tests.json"))
+setupIntegrationTest(join(__dirname, "..", "..", "tests.json"))
 
 test('number eval works', () => {
     expect(ev.eval(2)).toBe(2)
