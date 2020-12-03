@@ -1,5 +1,4 @@
 import { assert } from "console"
-import { stringify } from "querystring"
 
 export type LispValue = LispFunction | number | string | LispValue[] | boolean | null
 export type LispFunction = (this: LispEnvironment, ...v: LispValue[]) => LispValue
@@ -42,7 +41,7 @@ function variadicNumOp(pair: (x: number, y: number) => number): LispFunction {
         const v = (this.evalAll as LispFunction)(...rv) as LispValue[]
         const first = Number(v[0])
         if (first === NaN) {
-            throw `error at function +: ${v[0]} is not a number`
+            throw `error at binary math function: ${v[0]} is not a number`
         }
         return [first, ...v.slice(1)].reduce((acc, cur) => {
             switch (typeof cur) {
@@ -161,7 +160,8 @@ const baseLispEnvironment : LispEnvironment = {
         return Boolean(v)
     },
     intoString(v) {
-        return String(v)
+        const evalFn = (this.eval as LispFunction).bind(this)
+        return String(evalFn(v))
     },
     "+": variadicNumOp((x, y) => x + y),
     "-": variadicNumOp((x, y) => x - y),
@@ -259,5 +259,57 @@ const baseLispEnvironment : LispEnvironment = {
         const evaluated = (this.eval as LispFunction)(expr)
         const booleaned = (this.intoBool as LispFunction)(evaluated)
         return !booleaned
+    },
+    callFn(fn, params) {
+        const evalFn = (this.eval as LispFunction).bind(this)
+        if (!Array.isArray(params)) {
+            throw new Error("callFn: params must be a array")
+        }
+        const evaluatedFn = (this.eval as LispFunction)(fn)
+        if (typeof evaluatedFn !== "function") {
+            throw new Error("callFn: fn must be a function")
+        }
+        const evaluatedParams = evalFn(params)
+        return (evaluatedFn as LispFunction).bind(this)(...(evaluatedParams as LispValue[]))
+    },
+    fn(params, ...body) {
+        if (!Array.isArray(params)) {
+            throw new Error("params should be a array")
+        }
+        for (let i = 0; i < params.length; i++) {
+            if (typeof params[i] !== "string") {
+                throw Error("fn: parameters definition must be string")
+            }
+        }
+        const isVariadic = params[params.length - 1] == "&rest"
+        const nParams = isVariadic ? params.length - 1 : params.length
+        const fn = function(this: LispEnvironment, ...fnParams: LispValue[]) {
+            const evalFn = (this.eval as LispFunction).bind(this)
+            // fnParams = (fnParams[0] as LispValue[]).map(evalFn)
+            fnParams = (fnParams[0] as LispValue[])
+            if (!isVariadic) {
+                if (params.length != fnParams.length) {
+                    throw new Error(`Wrong number of parameters: expected ${params.length} got ${fnParams.length}`)
+                }
+            } else {
+                if (params.length > fnParams.length) {
+                    throw new Error(`Insuficient arguments: expected >=${params.length - 1} got ${fnParams.length}`)
+                }
+            }
+            const letFn = this.let as LispFunction
+            let letParams = []
+            for (let i = 0; i < nParams; i++) {
+                letParams.push(params[i])
+                letParams.push(fnParams[i])
+            }
+            if (isVariadic) {
+                letParams.push("rest")
+                letParams.push(["quote", fnParams.slice(nParams)])
+            }
+            letParams.push(body[0])
+            const ret = evalFn(['let', ...letParams])
+            return ret
+        }
+        return fn.bind(this)
     }
 } 

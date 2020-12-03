@@ -4,20 +4,20 @@ import LispEvaluator, { LispFunction, LispValue } from './index'
 
 const ev = new LispEvaluator()
 
-test('integration test', () => {
-    const buf = readFileSync(join(__dirname, '..', 'tests.json'))
+function setupIntegrationTest(filename: string) {
+    const buf = readFileSync(join(filename))
     const ast = JSON.parse(buf.toString('utf-8'))
     const testCases = ast.request as any[]
     for (const i in testCases) {
-        const test = testCases[i]
-        try {
-            const res = ev.eval(test)
+        const testCase = testCases[i]
+        test(`${JSON.stringify(testCase)}`, () => {
+            const res = ev.eval(testCase)
             expect(res).toBe(null)
-        } catch (e) {
-            throw `FAIL ${i}: ${JSON.stringify(test)} ${e}`
-        }
+        })
     }
-})
+}
+
+setupIntegrationTest(join(__dirname, "..", "tests.json"))
 
 test('number eval works', () => {
     expect(ev.eval(2)).toBe(2)

@@ -57,6 +57,10 @@
             "1"
         ],
         ["assertEq",
+            ["intoString", ["quote", 1]],
+            "1"
+        ],
+        ["assertEq",
             ["intoString", null],
             "null"
         ],
@@ -95,6 +99,25 @@
         ["assertEq",
             ["cdr", ["cdr", ["quote", [1, 2, 3]]]],
             ["quote", [3]]
+        ],
+        ["assertEq",
+            [["fn", ["x", "y"], 
+                ["+", ["get", "x"], ["get", "y"]]
+            ], 2, 2],
+            4
+        ],
+        ["assertEq",
+            ["callFn", 
+                ["get", "+"], 
+                ["quote", [1, 2, 3]]
+            ],
+            6
+        ],
+        ["assertEq",
+            [["fn", ["f", "&rest"],
+                ["callFn", ["get", "f"], ["get", "rest"]]
+            ], ["get", "+"], 2, 2],
+            4
         ]
     ]
 }
