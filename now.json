@@ -1,6 +1,0 @@
-{
-    "routes": [
-        {"src": "/typescript/dist/LispJSON.js", "dest": "/LispJSON.js"},
-        {"src": "/(.*)", "dest": "/index.html"}
-    ]
-}

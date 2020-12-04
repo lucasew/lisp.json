@@ -1,0 +1,9 @@
+{
+    "routes": [
+        {"src": "/LispJSON.js", "dest": "/LispJSON.js"},
+        {"src": "/(.*)", "dest": "/index.html"}
+    ],
+    "public": false,
+    "cleanUrls": true,
+    "trailingSlash": false
+}

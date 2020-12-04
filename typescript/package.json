@@ -30,7 +30,6 @@
     "test": "jest --coverage src/index.test.ts",
     "repl": "ts-node src/repl.ts",
     "build": "tsc",
-    "prepare": "yarn build",
-    "vercel-build": "yarn webpack && mkdir -p public/dist && mv dist/LispJSON.js public/dist && cp index.html public"
+    "prepare": "yarn build"
   }
 }
