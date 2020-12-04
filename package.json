@@ -4,6 +4,6 @@
     "version": "1.0.0",
     "dependencies": {},
     "scripts": {
-        "vercel-build": "\"$(cd ../typescript; yarn; yarn webpack; cp ./dist/LispJSON.js ../vercelDemo; cp -r ../vercelDemo ../public)\""
+        "vercel-build": "\"$(cd typescript; yarn; yarn webpack; cp ./dist/LispJSON.js ../public)\""
     }
 }
