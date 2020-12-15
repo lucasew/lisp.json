@@ -49,7 +49,7 @@
             ["/", 10, 3]
         ],
         ["assertEq",
-            ["concat", "teste: ", 24],
+            ["concat", "teste: ", ["intoString", 24]],
             "teste: 24"
         ],
         ["assertEq",
@@ -83,7 +83,7 @@
                     " and its written in ",
                     ["get", "language"],
                     ". Random math: ",
-                    ["get", "math"]
+                    ["intoString", ["get", "math"]]
                 ]
             ],
             "The name of the project is lisp.json and its written in typescript. Random math: 4"
