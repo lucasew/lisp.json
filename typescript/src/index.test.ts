@@ -192,3 +192,9 @@ test('should compare numbers', () => {
     expect(ev.eval(["!==", 1, 2])).toBe(true)
     expect(ev.eval(["===", 1, 2])).toBe(false)
 })
+
+test('seq', () => {
+    expect(ev.eval(["seq", 2])).toStrictEqual([0, 1])
+    expect(ev.eval(["seq", 2, 4])).toStrictEqual([2, 3])
+    expect(ev.eval(["seq", 2, 10, 2])).toStrictEqual([2, 4, 6, 8])
+})

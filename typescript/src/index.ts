@@ -198,6 +198,46 @@ const baseLispEnvironment : LispEnvironment = {
         const evalFn = (this.eval as LispFunction).bind(this)
         return (evalFn(x) as any) === (evalFn(y) as any)
     },
+    "seq": function (...params) {
+        const evalParams = (this.evalAll as LispFunction)(...params.slice(0, 3)) as LispValue[]
+        if (evalParams.filter(v => typeof v != 'number').length > 0) {
+            throw new Error("seq: all parameters must be numbers")
+        }
+        if (evalParams.length >= 3) {
+            const [from, to, step] = evalParams as number[]
+            if (from > to) {
+                throw new Error("seq: to cant be smaller than from")
+            }
+            let ret = []
+            for (let i = from; i < to; i += step) {
+                ret.push(i)
+            }
+            return ret
+        } 
+        if (evalParams.length == 2) {
+            const [from, to] = evalParams as number[]
+            if (from > to) {
+                throw new Error("seq: to cant be smaller than from")
+            }
+            let ret = []
+            for (let i = from; i < to; i++) {
+                ret.push(i)
+            }
+            return ret
+        }
+        if (evalParams.length == 1) {
+            const [to] = evalParams as number[]
+            if (to < 0) {
+                throw new Error("seq: to cant be smaller than 0")
+            }
+            let ret = []
+            for (let i = 0; i < to; i++) {
+                ret.push(i)
+            }
+            return ret
+        }
+        throw new Error("seq: invalid state")
+    },
     concat(...rv) {
         const v = (this.evalAll as LispFunction)(...rv) as LispValue[]
         const that = this
