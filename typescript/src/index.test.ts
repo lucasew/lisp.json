@@ -181,3 +181,14 @@ test('should eval cdr of cdr of a simple list', () => {
         ]
         )).toStrictEqual([3])
 })
+
+test('should compare numbers', () => {
+    expect(ev.eval(["==", 2, 2])).toBe(true)
+    expect(ev.eval(["<=", 1, 2])).toBe(true)
+    expect(ev.eval(["<", 1, 2])).toBe(true)
+    expect(ev.eval([">", 1, 2])).toBe(false)
+    expect(ev.eval([">=", 1, 2])).toBe(false)
+    expect(ev.eval(["!=", 1, 2])).toBe(true)
+    expect(ev.eval(["!==", 1, 2])).toBe(true)
+    expect(ev.eval(["===", 1, 2])).toBe(false)
+})

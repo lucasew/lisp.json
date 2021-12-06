@@ -166,6 +166,38 @@ const baseLispEnvironment : LispEnvironment = {
     "-": variadicNumOp((x, y) => x - y),
     "*": variadicNumOp((x, y) => x * y),
     "/": variadicNumOp((x, y) => x / y),
+    "==": function (x, y) {
+        const evalFn = (this.eval as LispFunction).bind(this)
+        return evalFn(x) == evalFn(y)
+    },
+    "<=": function (x, y) {
+        const evalFn = (this.eval as LispFunction).bind(this)
+        return (evalFn(x) as any) <= (evalFn(y) as any)
+    },
+    ">=": function (x, y) {
+        const evalFn = (this.eval as LispFunction).bind(this)
+        return (evalFn(x) as any) >= (evalFn(y) as any)
+    },
+    "<": function (x, y) {
+        const evalFn = (this.eval as LispFunction).bind(this)
+        return (evalFn(x) as any) < (evalFn(y) as any)
+    },
+    ">": function (x, y) {
+        const evalFn = (this.eval as LispFunction).bind(this)
+        return (evalFn(x) as any) > (evalFn(y) as any)
+    },
+    "!=": function (x, y) {
+        const evalFn = (this.eval as LispFunction).bind(this)
+        return (evalFn(x) as any) != (evalFn(y) as any)
+    },
+    "!==": function (x, y) {
+        const evalFn = (this.eval as LispFunction).bind(this)
+        return (evalFn(x) as any) !== (evalFn(y) as any)
+    },
+    "===": function (x, y) {
+        const evalFn = (this.eval as LispFunction).bind(this)
+        return (evalFn(x) as any) === (evalFn(y) as any)
+    },
     concat(...rv) {
         const v = (this.evalAll as LispFunction)(...rv) as LispValue[]
         const that = this
