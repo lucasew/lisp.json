@@ -261,6 +261,16 @@ const baseLispEnvironment : LispEnvironment = {
         }
         return (this.eval as LispFunction).bind(newEnv)(rv[rv.length - 1])
     },
+    map(fn, arr) {
+        const evalFn = (this.eval as LispFunction).bind(this)
+        
+        const efn = evalFn(fn) as LispFunction
+        const earr = evalFn(arr) as LispValue
+        if (!Array.isArray(earr)) {
+            throw new Error("map: second argument must be a list")
+        }
+        return earr.map(p => efn.bind(this)([p]))
+    },
     eq(a, b) {
         const [x, y] = (this.evalAll as LispFunction)(a, b) as [LispValue, LispValue]
         if (typeof x != typeof y) {

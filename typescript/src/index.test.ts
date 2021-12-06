@@ -198,3 +198,7 @@ test('seq', () => {
     expect(ev.eval(["seq", 2, 4])).toStrictEqual([2, 3])
     expect(ev.eval(["seq", 2, 10, 2])).toStrictEqual([2, 4, 6, 8])
 })
+
+test('map sum', () => {
+    expect(ev.eval(["map", ["fn", ["x"], ["+", 2, ["get", "x"]]],  ["seq", 10]])).toStrictEqual([2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+})
