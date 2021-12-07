@@ -203,6 +203,7 @@ test('map sum', () => {
     expect(ev.eval(["map", ["fn", ["x"], ["+", 2, ["get", "x"]]],  ["seq", 10]])).toStrictEqual([2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
 })
 
+
 test('map not', () => {
     expect(ev.eval(["map", ["get", "not"], ["quote", [false, true, false]]])).toStrictEqual([true, false, true])
 })

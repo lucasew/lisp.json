@@ -251,15 +251,17 @@ const baseLispEnvironment : LispEnvironment = {
             throw new Error("[let, key, value, key, value, ..., ret]")
         }
         let newEnv = pushThis(this)
+        const newEval = (newEnv.eval as LispFunction).bind(newEnv)
         for (let i = 0; i < (rv.length - 1) / 2; i++) {
-            const key = (this.eval as LispFunction).bind(newEnv)(rv[i*2])
+            const key = newEval(rv[i*2])
             if (typeof key != 'string') {
                 throw new Error(`variable key is a ${typeof key} but must be string`)
             }
-            const value = (this.eval as LispFunction).bind(newEnv)(rv[i*2 + 1])
+            const value = newEval(rv[i*2 + 1])
             newEnv[key] = value
         }
-        return (this.eval as LispFunction).bind(newEnv)(rv[rv.length - 1])
+        console.log("let: ", newEnv.n)
+        return newEval(rv[rv.length - 1])
     },
     map(fn, arr) {
         const evalFn = (this.eval as LispFunction).bind(this)
@@ -365,8 +367,8 @@ const baseLispEnvironment : LispEnvironment = {
         const isVariadic = params[params.length - 1] == "&rest"
         const nParams = isVariadic ? params.length - 1 : params.length
         const that = this
-        const fn = function(...fnParams: LispValue[]) {
-            const evalFn = (that.eval as LispFunction).bind(that)
+        return function(...fnParams: LispValue[]) {
+            const evalFn = (that.eval as LispFunction).bind(this)
             // fnParams = (fnParams[0] as LispValue[]).map(evalFn)
             if (!isVariadic) {
                 if (params.length != fnParams.length) {
@@ -391,6 +393,5 @@ const baseLispEnvironment : LispEnvironment = {
             const ret = evalFn(['let', ...letParams])
             return ret
         }
-        return fn.bind(that)
     }
 } 
