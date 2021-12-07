@@ -98,7 +98,7 @@ const baseLispEnvironment : LispEnvironment = {
         let fnCandidate = fn
         if (Array.isArray(fnCandidate)) {
             const evaluated = (this.eval as LispFunction)(fnCandidate)
-            return (this.evalFunction as LispFunction)(evaluated, expr)
+            return (this.evalFunction as LispFunction)(evaluated, ...expr)
         }
         if (typeof fnCandidate == 'string') {
             fnCandidate = this[fnCandidate] as LispFunction
@@ -263,13 +263,13 @@ const baseLispEnvironment : LispEnvironment = {
     },
     map(fn, arr) {
         const evalFn = (this.eval as LispFunction).bind(this)
-        
-        const efn = evalFn(fn) as LispFunction
-        const earr = evalFn(arr) as LispValue
+        const evalFnFn = (this.evalFunction as LispFunction).bind(this)
+        const earr = evalFn(arr) as LispValue[]
         if (!Array.isArray(earr)) {
             throw new Error("map: second argument must be a list")
         }
-        return earr.map(p => efn.bind(this)([p]))
+        const efn = (evalFn(fn) as LispFunction).bind(this)
+        return earr.map(p => efn.bind(this)(["quote", p]))
     },
     eq(a, b) {
         const [x, y] = (this.evalAll as LispFunction)(a, b) as [LispValue, LispValue]
@@ -364,20 +364,20 @@ const baseLispEnvironment : LispEnvironment = {
         }
         const isVariadic = params[params.length - 1] == "&rest"
         const nParams = isVariadic ? params.length - 1 : params.length
-        const fn = function(this: LispEnvironment, ...fnParams: LispValue[]) {
-            const evalFn = (this.eval as LispFunction).bind(this)
+        const that = this
+        const fn = function(...fnParams: LispValue[]) {
+            const evalFn = (that.eval as LispFunction).bind(that)
             // fnParams = (fnParams[0] as LispValue[]).map(evalFn)
-            fnParams = (fnParams[0] as LispValue[])
             if (!isVariadic) {
                 if (params.length != fnParams.length) {
                     throw new Error(`Wrong number of parameters: expected ${params.length} got ${fnParams.length}`)
                 }
             } else {
                 if (params.length > fnParams.length) {
-                    throw new Error(`Insuficient arguments: expected >=${params.length - 1} got ${fnParams.length}`)
+                    throw new Error(`Insuficient arguments: expected >=${params.length} got ${fnParams.length}`)
                 }
             }
-            const letFn = this.let as LispFunction
+            const letFn = that.let as LispFunction
             let letParams = []
             for (let i = 0; i < nParams; i++) {
                 letParams.push(params[i])
@@ -391,6 +391,6 @@ const baseLispEnvironment : LispEnvironment = {
             const ret = evalFn(['let', ...letParams])
             return ret
         }
-        return fn.bind(this)
+        return fn.bind(that)
     }
 } 
