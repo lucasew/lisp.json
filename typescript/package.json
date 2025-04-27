@@ -30,7 +30,7 @@
     "test": "jest --coverage src/index.test.ts",
     "repl": "ts-node src/repl.ts",
     "build": "tsc",
-    "prepare": "yarn build",
+    "prepare": "npm run build build",
     "vercel-build": ""
   }
 }
