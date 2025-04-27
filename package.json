@@ -1,9 +1,9 @@
 {
-    "name": "lisp-json-vercel",
-    "description": "description",
-    "version": "0.0.1",
-    "dependencies": {},
-    "scripts": {
-        "vercel-build": "echo \"$(cd typescript; yarn; yarn webpack; cp ./dist/LispJSON.js ../public)\""
-    }
+  "name": "lisp-json-vercel",
+  "description": "description",
+  "version": "0.0.1",
+  "dependencies": {},
+  "scripts": {
+    "vercel-build": "echo \"$(cd typescript; npm install; npm run webpack; cp ./dist/LispJSON.js ../public)\""
+  }
 }
