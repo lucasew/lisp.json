@@ -9,14 +9,13 @@ const config: webpack.Configuration = {
     output: {
         path: resolve(__dirname, "dist"),
         filename: '[name].js',
-        libraryTarget: 'var',
-        library: 'LispJSON',
+        library: {
+            name: "LispJSON",
+            type: "umd"
+        }
     },
     resolve: {
         extensions: [".ts"],
-        fallback: {
-            "console": false
-        },
     },
     devtool: 'source-map',
     optimization: {
@@ -30,19 +29,8 @@ const config: webpack.Configuration = {
                 use: 'ts-loader',
                 exclude: /node_modules/,
             }
-        ],
-        
-    },
-    // module: {
-    //     loaders: [{
-    //         test: /\.tsx?$/,
-    //         loader: 'awesome-typescript-loader',
-    //         exclude: /node_modules/,
-    //         query: {
-    //             declaration: false,
-    //         }
-    //     }]
-    // }
+        ]
+    }
 }
 
 export default config;

@@ -1,5 +1,3 @@
-import { assert } from "console"
-
 export type LispValue = LispFunction | number | string | LispValue[] | boolean | null
 export type LispFunction = (this: LispEnvironment, ...v: LispValue[]) => LispValue
 export type LispExpression = [LispFunction | string, ...LispValue[]]
@@ -26,7 +24,7 @@ export default class LispEvaluator {
         return (this.env.eval as LispFunction).bind(this.env)(v)
     }
     public evalAll(this: LispEvaluator, ...v: LispValue[]): LispValue[] {
-        assert(this.env.evalAll != undefined)
+        console.assert(this.env.evalAll != undefined)
         return (this.env.evalAll as LispFunction).bind(this.env)(...v) as LispValue[]
     }
     public pushThis(this: LispEvaluator): LispEvaluator {
