@@ -38,7 +38,7 @@ function variadicNumOp(pair: (x: number, y: number) => number): LispFunction {
     return function (...rv) {
         const v = (this.evalAll as LispFunction)(...rv) as LispValue[]
         const first = Number(v[0])
-        if (first === NaN) {
+        if (Number.isNaN(first)) {
             throw `error at binary math function: ${v[0]} is not a number`
         }
         return [first, ...v.slice(1)].reduce((acc, cur) => {
@@ -332,7 +332,7 @@ const baseLispEnvironment : LispEnvironment = {
         try {
             const ret = (this.eval as LispFunction)(expr)
             return ret
-        } catch (e) {
+        } catch (e: any) {
             return ['error', e.message ? e.message : String(e)]
         }
     },

@@ -24,7 +24,7 @@ async function runRepl() {
         let obj = null
         try {
             obj = JSON.parse(buf)
-        } catch (e) {
+        } catch (e: any) {
             console.log(`incomplete or invalid input: ${e}`)
             if (line == '') {
                 buf = ''
@@ -34,7 +34,7 @@ async function runRepl() {
         try {
             const evaluated = vm.eval(obj)
             console.log(evaluated)
-        } catch (e) {
+        } catch (e: any) {
             console.log(`error: ${e.message || e}`)
             continue
         } finally {
