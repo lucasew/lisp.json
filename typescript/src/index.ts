@@ -1,13 +1,30 @@
+/** Primitive and composite types supported by the Lisp environment */
 export type LispValue = LispFunction | number | string | LispValue[] | boolean | null
+
+/**
+ * A callable Lisp function. It executes within the context of a `LispEnvironment`
+ * and handles raw Lisp arguments.
+ */
 export type LispFunction = (this: LispEnvironment, ...v: LispValue[]) => LispValue
+
+/** A typical Lisp expression representing a function call and its arguments */
 export type LispExpression = [LispFunction | string, ...LispValue[]]
 
+/** Represents a sequence of expressions to evaluate */
 export type LispRequest = {
     actions: LispExpression[]
 }
 
+/**
+ * The execution context for Lisp evaluation. Stores variables, functions, and
+ * inherits from outer scopes via JavaScript prototypes.
+ */
 export type LispEnvironment = Record<string, LispValue>
 
+/**
+ * State manager for Lisp execution. It holds the root environment and exposes methods
+ * to evaluate single expressions or sequences of actions.
+ */
 export default class LispEvaluator {
     public env: LispEnvironment = baseLispEnvironment
 
@@ -17,16 +34,23 @@ export default class LispEvaluator {
         this.env = pushThis(this.env, options?.extraEnv)
     }
 
+    /** Process a list of actions and returns their results */
     public responder(this: LispEvaluator, req: LispRequest): LispValue[] {
         return (this.env.evalAll as LispFunction).bind(this.env)(req.actions) as LispValue[]
     }
+
+    /** Evaluates a single value or expression */
     public eval(this: LispEvaluator, v: LispValue): LispValue {
         return (this.env.eval as LispFunction).bind(this.env)(v)
     }
+
+    /** Evaluates a sequence of values or expressions */
     public evalAll(this: LispEvaluator, ...v: LispValue[]): LispValue[] {
         console.assert(this.env.evalAll != undefined)
         return (this.env.evalAll as LispFunction).bind(this.env)(...v) as LispValue[]
     }
+
+    /** Creates a child evaluator with a new lexical scope inheriting the current one */
     public pushThis(this: LispEvaluator): LispEvaluator {
         let ret = pushThis(this)
         ret.env = pushThis(this.env)
@@ -57,13 +81,29 @@ function variadicNumOp(pair: (x: number, y: number) => number): LispFunction {
         })
     }
 }
+/**
+ * Pushes a new lexical scope by setting the `__proto__` of a new object to the base object.
+ * This ensures that variables set in the new scope mask those in the outer scope,
+ * without mutating the parent environment.
+ *
+ * @param base The parent scope to inherit from
+ * @param layer Optional object with initial variables to pre-populate the new scope
+ */
 export function pushThis<T extends Object>(base: T, layer?: T | undefined) {
     let ret = (layer || {}) as any
     ret.__proto__ = base
     return ret as T
 }
 
+/**
+ * The standard library and base environment for the Lisp runtime.
+ * Contains all built-in operators, primitives, and the central `eval` dispatch logic.
+ */
 const baseLispEnvironment : LispEnvironment = {
+    /**
+     * The core evaluator.
+     * Resolves variables, returns primitives directly, or dispatches lists to `evalFunction`.
+     */
     eval(v) {
         if (Array.isArray(v)) {
             if (v.length == 0) {
@@ -88,10 +128,16 @@ const baseLispEnvironment : LispEnvironment = {
             throw new Error(`invalid value of type ${typeof v}: ${v}`)
         }
     },
+    /** Evaluates a list of expressions sequentially */
     evalAll(...v) {
         const that = this
         return v.map((cur) => (that.eval as LispFunction).bind(that)(cur))
     },
+    /**
+     * Determines how a function should be invoked. It recursively evaluates arrays
+     * to find the target function, looks up strings in the current environment,
+     * and asserts the target is callable.
+     */
     evalFunction(fn, ...expr) {
         let fnCandidate = fn
         if (Array.isArray(fnCandidate)) {
@@ -244,6 +290,11 @@ const baseLispEnvironment : LispEnvironment = {
             return acc + (txt as string)
         })
     },
+    /**
+     * Creates a new lexical environment to bind local variables.
+     * Takes pairs of key/values and binds them in the newly created scope.
+     * The final argument is evaluated and returned within this new scope.
+     */
     "let": function (...rv) {
         if (rv.length % 2 == 0) {
             throw new Error("[let, key, value, key, value, ..., ret]")
