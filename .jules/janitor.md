@@ -1,0 +1,1 @@
+- 2026-03-28: Use Number.isNaN instead of === NaN and properly type catch variables.
